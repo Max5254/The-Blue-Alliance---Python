@@ -6,6 +6,7 @@ import urllib2
 import urllib
 import json
 import webbrowser
+import demjson
 
 now = datetime.datetime.now()
 
@@ -16,15 +17,16 @@ client_secret = 'a3c9db6724915332b454256493cbb0e854db1e5e'
 
 
 
-# This whole project was based on some code by @gersteinj.
-# Thanks for the initial code!
+# The project I based this project off of was based on some code by @gersteinj.
+# My project is based off of The Python Alliance
+#https://github.com/MC42/the-python-alliance/blob/master/thepythonalliance.py
 
 initials = 'MW'
 github = "https://github.com/Max5254/"
-teamToHighlight = str("5254")  # Enter your own team here!
+teamToHighlight = str("5254")
 
 baseURL = 'http://www.thebluealliance.com/api/v2/'
-header = {'X-TBA-App-Id': 'frc5254:thepythonalliance:beta'}  # Yay, version strings....
+header = {'X-TBA-App-Id': 'frc5254:thepythonalliance:beta'}
 
 
 class bcolors:
@@ -74,6 +76,42 @@ class tba:
         jsonified = response.json()
         return jsonified['nickname']
 
+    def get_team_event_key(self, team, year):
+        myRequest = (baseURL + 'team/frc' + str(team) + '/' + str(year) + '/events')
+        response = requests.get(myRequest, headers=header)
+        jsonified = response.json()
+        for x in range(0 , len(jsonified)):
+            print (jsonified[x]['key'])
+        #if jsonified['location'] != None:
+        #    if jsonified['nickname'] != None:
+        #      print('Team Nickname: \t' + bcolors.OKGREEN + jsonified['nickname'] + bcolors.ENDC)
+        #if (jsonified['location'] == None) and (jsonified['website'] == None):
+        #   print('\nThere is no information avalible for Team ')
+
+    def get_team_event_matches(self, eventKey, team):
+        myRequest = (baseURL + 'team/frc' + str(team) + '/event/' + str(eventKey) + '/matches')
+        response = requests.get(myRequest, headers=header)
+        jsonified = response.json()
+        print  jsonified
+        n = 2
+        schedule = [[0 for i in range(2)] for i in range(len(jsonified))]
+        teams = [[0 for i in range(5)] for i in range(len(jsonified))]
+        print schedule
+        #schedule.append([])
+        #schedule.append([])
+        for x in range(0 , len(jsonified)):
+            schedule[x][0] = (str(jsonified[x]['comp_level']) +  str(jsonified[x]['match_number']))
+
+            for y in range (0,3):
+                blueTeams =  jsonified[x]['alliances']['blue']['teams'][y]
+                blueTeams = blueTeams[3:]
+                redTeams = jsonified[x]['alliances']['red']['teams'][y]
+                redTeams = redTeams[3:]
+                print blueTeams
+                print redTeams
+        print schedule
+
+
     def img(self):
         teamNumber = raw_input("please enter a team number: ")
         myRequest = (baseURL + 'team/frc' + str(teamNumber) + '/'+ str(now.year) + "/media")
@@ -104,43 +142,13 @@ class tba:
 
 
 
-    def help(self):
-        print('Please enter a section of the site to load:')
-        print('\'e\' or \'events\' for a list of all events this season.')
-        print('\'ev\' or \'event\' for information on a single event.')
-        print('\'t\' or \'team\' for a single team\'s information.')
-        print('\'a\' or \'all\' for a list of all teams. (by page number on TBA)')
-        print('\'d\' or \'district\' for a list of all current FIRST Districts & Codes')
-        print('\'dr\' or \'distrank\' for district rankings for a specific district.')
-        print('\'?\' or \'help\' for this page.')
-
-
 print(
 bcolors.OKBLUE + ' ________         ___       __  __               ___   _____  \n/_  __/ /  ___   / _ \__ __/ /_/ /  ___  ___    / _ | / / (_)__ ____  _______ \n / / / _ \/ -_) / ___/ // / __/ _ \/ _ \/ _ \  / __ |/ / / / _ `/ _ \/ __/ -_)\n/_/ /_//_/\__/ /_/   \_, /\__/_//_/\___/_//_/ /_/ |_/_/_/_/\_,_/_//_/\__/\__/ \n                    /___/  ' + bcolors.ENDC)
 
 tba = tba()
-#tba.help()
+#tba.img()
+#tba.get_team_event_key(5254, 2016)
+#print ''
+tba.get_team_event_matches('2016iri' , '5254')
 
-command ="i" # raw_input('\nSelection: ')
-#command = command.split(' ')
 
-if ((command[0] is 'e') or (command[0] == 'events')):
-    tba.get_events(now.year)
-elif ((command[0] is 't') or (command[0] == 'team')):
-    tba.get_team()
-elif ((command[0] is 'a') or (command[0] == 'all')):
-    tba.get_all_team()
-elif ((command[0] is 'd') or (command[0] == 'district')):
-    tba.get_districts()
-elif ((command[0] == 'dr') or (command[0] == 'dist')):
-    tba.get_distrank()
-elif ((command[0] == 'ev') or (command[0] == 'event')):
-    tba.get_event_info()
-elif ((command[0] == '?') or (command[0] == 'help')):
-    tba.help()
-elif ((command[0] == "i")):
-    tba.img()
-else:
-    print('Please enter a valid command.')
-
-# That's all folks!
