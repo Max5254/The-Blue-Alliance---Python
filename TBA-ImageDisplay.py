@@ -75,24 +75,33 @@ class tba:
         return jsonified['nickname']
 
     def img(self):
-        teamNumber = raw_input("please enter a team number: ")
-        myRequest = (baseURL + 'team/frc' + str(teamNumber) + '/'+ str(now.year) + "/media")
+        teamNumber = '125'#raw_input("please enter a team number: ")
+        year = '2013'#raw_input("please enter a year: ")
+        myRequest = (baseURL + 'team/frc' + str(teamNumber) + '/'+ str(year) + "/media")
         response = requests.get(myRequest, headers=header)
         jsonified = response.json()
         print(jsonified)
         key = ""
-        if jsonified != None:
+        print jsonified == []
+        if jsonified != []:
             type = jsonified[0]['type']
             if type == "imgur":
                 key = jsonified[0]['foreign_key']
                 print key
-            image = im.get_image(key)
-            print(image.link)
-            imgURL = ("www." + str(type)  + ".com/" + str(key))
-            message = ("""<html>
+                image = im.get_image(key)
+                imgURL = (image.link)
+            if type == "cdphotothread":
+                key = jsonified[0]['details']['image_partial']
+                print(key)
+                CDendURL = key
+                imgURL = "https://www.chiefdelphi.com/media/img/" + str(CDendURL)
+        else:
+            imgURL = "http://www.404notfound.fr/assets/images/pages/img/androiddev101.jpg"
+            message = (
+            """<html>
             <body>
             <h1>Team """ + str(teamNumber) +  """ 2016 Robot</h1>
-            <img src=""" + str(image.link) + """>
+            <img src=""" + imgURL + """>
             </body>
             </html>""")
 
